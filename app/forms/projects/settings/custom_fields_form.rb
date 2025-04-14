@@ -29,29 +29,29 @@
 #++
 module Projects
   module Settings
-    class RelationsForm < ApplicationForm
+    class CustomFieldsForm < ApplicationForm
+      include ::CustomFields::CustomFieldRendering
+
       form do |f|
-        f.project_autocompleter(
-          name: :parent_id,
-          label: attribute_name(:parent_id),
-          autocomplete_options: {
-            focusDirectly: false,
-            dropdownPosition: "bottom",
-            url: project_autocompleter_url,
-            filters: [],
-            data: {
-              "qa-field-name": "parent"
-            }
-          }
-        )
+        render_custom_fields(form: f)
+      end
+
+      def initialize(project:)
+        super()
+        @project = project
+      end
+
+      # override since we want to add the model with @project
+      def additional_custom_field_input_arguments
+        { model: @project, wrapper_id: nil }
       end
 
       private
 
-      def project_autocompleter_url
-        url_str = ::API::V3::Utilities::PathHelper::ApiV3Path.projects_available_parents
-        url_str << "?of=#{model.id}" unless model.new_record?
-        url_str
+      def custom_fields
+        @project
+          .available_custom_fields
+          .required
       end
     end
   end

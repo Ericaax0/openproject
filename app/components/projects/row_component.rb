@@ -362,7 +362,7 @@ module Projects
           scheme: :default,
           icon: :copy,
           label: I18n.t(:button_copy),
-          href: copy_project_path(project),
+          href: copy_form_project_path(project),
           data: { turbo: false }
         }
       end

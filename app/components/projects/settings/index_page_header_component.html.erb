@@ -50,7 +50,7 @@
       if @project.copy_allowed?
         menu.with_item(
           label: t(:button_copy),
-          href: copy_project_path(@project),
+          href: copy_form_project_path(@project),
           content_arguments: {
             data: { turbo: false },
             test_selector: "project-settings--copy"

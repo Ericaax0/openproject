@@ -27,32 +27,41 @@
 #
 # See COPYRIGHT and LICENSE files for more details.
 #++
+
 module Projects
-  module Settings
-    class RelationsForm < ApplicationForm
-      form do |f|
-        f.project_autocompleter(
-          name: :parent_id,
-          label: attribute_name(:parent_id),
-          autocomplete_options: {
-            focusDirectly: false,
-            dropdownPosition: "bottom",
-            url: project_autocompleter_url,
-            filters: [],
-            data: {
-              "qa-field-name": "parent"
-            }
-          }
-        )
+  class SubmitOrCancel < ApplicationForm
+    form do |buttons|
+      buttons.group(layout: :horizontal) do |button_group|
+        button_group.submit(**@submit_button_options)
+        button_group.button(**@cancel_button_options)
       end
+    end
 
-      private
+    def initialize(submit_button_options: {}, cancel_button_options: {})
+      super()
+      @submit_button_options = default_submit_button_options.merge(submit_button_options)
+      @cancel_button_options = default_cancel_button_options.merge(cancel_button_options)
+    end
 
-      def project_autocompleter_url
-        url_str = ::API::V3::Utilities::PathHelper::ApiV3Path.projects_available_parents
-        url_str << "?of=#{model.id}" unless model.new_record?
-        url_str
-      end
+    private
+
+    def default_submit_button_options
+      {
+        name: :submit,
+        scheme: :primary,
+        label: I18n.t("button_create"),
+        disabled: false
+      }
+    end
+
+    def default_cancel_button_options
+      {
+        name: :cancel,
+        scheme: :default,
+        tag: :a,
+        href: OpenProject::StaticRouting::StaticRouter.new.url_helpers.projects_path,
+        label: I18n.t("button_cancel")
+      }
     end
   end
 end

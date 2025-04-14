@@ -249,7 +249,7 @@ Rails.application.routes.draw do
     resource :menu, only: %i[show]
   end
 
-  resources :projects, except: %i[show edit create update] do
+  resources :projects, except: %i[show edit update] do
     scope module: "projects" do
       namespace "settings" do
         resource :general, only: %i[show update], controller: "general"
@@ -295,7 +295,8 @@ Rails.application.routes.draw do
     member do
       get "settings", to: redirect("projects/%{id}/settings/general/")
 
-      get :copy
+      get :copy_form
+      post :copy
 
       patch :types
 

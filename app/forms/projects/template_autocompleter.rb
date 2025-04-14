@@ -27,32 +27,30 @@
 #
 # See COPYRIGHT and LICENSE files for more details.
 #++
+
 module Projects
-  module Settings
-    class RelationsForm < ApplicationForm
-      form do |f|
-        f.project_autocompleter(
-          name: :parent_id,
-          label: attribute_name(:parent_id),
-          autocomplete_options: {
-            focusDirectly: false,
-            dropdownPosition: "bottom",
-            url: project_autocompleter_url,
-            filters: [],
-            data: {
-              "qa-field-name": "parent"
-            }
+  class TemplateAutocompleter < ApplicationForm
+    form do |f|
+      f.project_autocompleter(
+        # scope_name_to_model: false,
+        name: "template_id",
+        # value: "foo",
+        label: I18n.t("js.project.use_template"),
+        autocomplete_options: {
+          focusDirectly: false,
+          dropdownPosition: "bottom",
+          placeholder: I18n.t("js.project.no_template_selected"),
+          filters: [
+            { name: "user_action", operator: "=", values: ["projects/copy"] },
+            { name: "templated", operator: "=", values: ["t"] }
+          ],
+          data: {
+            "projects-form-target": "templateSelect",
+            action: "change->highlight-when-value-selected#itemSelected change->projects-form#templateSelected",
+            "qa-field-name": "use_template"
           }
-        )
-      end
-
-      private
-
-      def project_autocompleter_url
-        url_str = ::API::V3::Utilities::PathHelper::ApiV3Path.projects_available_parents
-        url_str << "?of=#{model.id}" unless model.new_record?
-        url_str
-      end
+        }
+      )
     end
   end
 end

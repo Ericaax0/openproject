@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #-- copyright
 # OpenProject is an open source project management software.
 # Copyright (C) the OpenProject GmbH
@@ -32,10 +34,10 @@ class ProjectsController < ApplicationController
   menu_item :overview
   menu_item :roadmap, only: :roadmap
 
-  before_action :find_project, except: %i[index new export_list_modal]
+  before_action :find_project, except: %i[index new create export_list_modal]
   before_action :load_query_or_deny_access, only: %i[index export_list_modal]
-  before_action :authorize, only: %i[copy deactivate_work_package_attachments]
-  before_action :authorize_global, only: %i[new]
+  before_action :authorize, only: %i[copy_form copy deactivate_work_package_attachments]
+  before_action :authorize_global, only: %i[new create]
   before_action :require_admin, only: %i[destroy destroy_info]
 
   no_authorization_required! :index, :export_list_modal
@@ -89,11 +91,71 @@ class ProjectsController < ApplicationController
   end
 
   def new
-    render layout: "no_menu"
+    if params[:template_id]
+      @template = Project.find(params[:template_id])
+      @project = Projects::CopyService
+        .new(user: current_user, source: @template, contract_options: { validate_model: false })
+        .call(target_project_params: {}, attributes_only: true)
+        .result
+    else
+      @project = if params[:parent_id]
+                   Project.find(params[:parent_id]).children.build
+                 else
+                   Project.new
+                 end
+    end
+
+    respond_to do |format|
+      format.html do
+        render layout: "no_menu"
+      end
+
+      format.turbo_stream do
+        replace_via_turbo_stream(
+          component: Projects::NewComponent.new(project: @project, template: @template)
+        )
+        current_url = url_for(params.permit(:parent_id, :template_id))
+        turbo_streams << turbo_stream.push_state(current_url)
+        render turbo_stream: turbo_streams
+      end
+    end
+  end
+
+  def create
+    service_call = Projects::CreateService
+      .new(user: current_user)
+      .call(permitted_params.project)
+
+    @project = service_call.result
+
+    if service_call.success?
+      flash[:notice] = I18n.t(:notice_successful_create)
+      redirect_to project_path(@project)
+    else
+      render action: :new, status: :unprocessable_entity
+    end
+  end
+
+  def copy_form
+    render
   end
 
   def copy
-    render
+    service_call = Projects::EnqueueCopyService
+      .new(user: current_user, model: @project)
+      .call(
+        target_project_params: permitted_params.project.to_h,
+        only: params[:only],
+        send_notifications: params[:send_notifications]
+      )
+
+    if service_call.success?
+      job = service_call.result
+      redirect_to job_status_path(job.job_id)
+    else
+      @project = service_call.result
+      render action: :new, status: :unprocessable_entity
+    end
   end
 
   # Delete @project

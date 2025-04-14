@@ -26,31 +26,35 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 See COPYRIGHT and LICENSE files for more details.
 
 ++#%>
-<% html_title t("label_project_new") %>
-<%=
-  render(Primer::OpenProject::PageHeader.new) do |header|
-    header.with_title { t(:label_project_new) }
-    header.with_breadcrumbs([{ href: home_path, text: organization_name }, t(:label_project_new)])
-  end
-%>
-
-<% content_controller "projects-form", dynamic: true %>
 
 <%=
-  admin_settings_primer_form_with(action: :new, data: { turbo: false }) do |f|
-    render(
-      Primer::Box.new(
-        border: true, border_radius: 2, bg: :inset, my: 3, p: 3,
-        data: {
-          controller: "highlight-when-value-selected",
-          highlight_when_value_selected_highlight_class: Primer::Classify.(bg: :accent)[:class],
-          highlight_when_value_selected_target: "content"
-        }
-      )
-    ) do
-      render Projects::TemplateAutocompleter.new(f)
+  component_wrapper do
+    admin_settings_primer_form_with(model: project, url: template ? copy_project_path(template) : projects_path) do |f|
+      flex_layout do |container|
+        container.with_row(mb: 3) do
+          render(
+            Primer::Forms::FormList.new(
+              Projects::Settings::NameForm.new(f),
+              Projects::Settings::RelationsForm.new(f),
+              Projects::Settings::CustomFieldsForm.new(f, project:)
+            )
+          )
+        end
+
+        if template
+          container.with_row(mb: 3) do
+            render(Primer::Box.new(border: true, border_radius: 2, bg: :inset, p: 3)) do
+              f.fields_for(:copy_options, nil) do |f|
+                render(Projects::CopyOptions.new(f))
+              end
+            end
+          end
+        end
+
+        container.with_row(mb: 3) do
+          render Projects::SubmitOrCancel.new(f)
+        end
+      end
     end
   end
 %>
-
-<%= render Projects::NewComponent.new(project: @project, template: @template) %>
