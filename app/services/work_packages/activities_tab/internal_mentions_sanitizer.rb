@@ -28,7 +28,7 @@
 # See COPYRIGHT and LICENSE files for more details.
 #++
 
-class WorkPackages::ActivitiesTab::RestrictedMentionsSanitizer
+class WorkPackages::ActivitiesTab::InternalMentionsSanitizer
   def self.sanitize(work_package, notes)
     new(work_package, notes).call
   end
@@ -65,7 +65,7 @@ class WorkPackages::ActivitiesTab::RestrictedMentionsSanitizer
 
   def mentionable_principals
     @mentionable_principals ||= Queries::Principals::PrincipalQuery.new(user: User.current)
-      .where(:restricted_mentionable_on_work_package, "=", [work_package.id])
+      .where(:internal_mentionable_on_work_package, "=", [work_package.id])
       .where(:status, "!", [Principal.statuses[:locked]])
       .where(:type, "=", %w[User Group])
       .results

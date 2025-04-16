@@ -80,7 +80,7 @@ RSpec.describe WorkPackages::CreateNoteContract do
     end
   end
 
-  describe "journal_restricted" do
+  describe "journal_internal" do
     before do
       allow(policy_instance).to receive(:allowed?).and_return(true)
     end
@@ -88,20 +88,20 @@ RSpec.describe WorkPackages::CreateNoteContract do
     context "with a blank note" do
       before do
         work_package.journal_notes = ""
-        work_package.journal_restricted = true
+        work_package.journal_internal = true
 
         contract.validate
       end
 
-      context "and journal_restricted is true, and comments_with_restricted_visibility_active? is disabled",
-              with_flag: { comments_with_restricted_visibility_active: false } do
+      context "and journal_internal is true, and internal_comments_active? is disabled",
+              with_flag: { internal_comments_active: false } do
         it "is invalid" do
-          expect(contract.errors.full_messages).to eq(["Comment can't be blank.", "Restricted Journal is not available."])
+          expect(contract.errors.full_messages).to eq(["Comment can't be blank.", "Internal Journal is not available."])
         end
       end
 
-      context "and journal_restricted is true, and comments_with_restricted_visibility_active? is enabled",
-              with_flag: { comments_with_restricted_visibility_active: true } do
+      context "and journal_internal is true, and internal_comments_active? is enabled",
+              with_flag: { internal_comments_active: true } do
         it "is invalid" do
           expect(contract.errors.full_messages).to eq(["Comment can't be blank."])
         end
@@ -109,10 +109,10 @@ RSpec.describe WorkPackages::CreateNoteContract do
     end
 
     context "with a note" do
-      context "and journal_restricted is true", with_flag: { comments_with_restricted_visibility_active: true } do
+      context "and journal_internal is true", with_flag: { internal_comments_active: true } do
         before do
           work_package.journal_notes = "blubs"
-          work_package.journal_restricted = true
+          work_package.journal_internal = true
 
           contract.validate
         end

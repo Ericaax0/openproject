@@ -50,7 +50,7 @@ RSpec.describe Activities::Fetcher, "integration" do
       .not_to include("budgets")
   end
 
-  describe "#events", with_flag: { comments_with_restricted_visibility: true } do
+  describe "#events", with_flag: { internal_comments: true } do
     let(:event_user) { user }
     let(:work_package) { create(:work_package, project:, author: event_user) }
     let(:forum) { create(:forum, project:) }
@@ -61,12 +61,12 @@ RSpec.describe Activities::Fetcher, "integration" do
     let(:changeset) { create(:changeset, committer: event_user.login, repository:) }
     let(:wiki) { create(:wiki, project:) }
     let(:wiki_page) { create(:wiki_page, wiki:, author: event_user, text: "some text") }
-    let(:restricted_note) do
+    let(:internal_comment) do
       create(:work_package_journal,
              journable: work_package,
              user: admin,
-             notes: "Restricted comment",
-             restricted: true,
+             notes: "Internal comment",
+             internal: true,
              version: 2,
              data: build(:journal_work_package_journal,
                          subject: work_package.subject,
@@ -158,7 +158,7 @@ RSpec.describe Activities::Fetcher, "integration" do
         end
       end
 
-      context "if user cannot see restricted journals" do
+      context "if user cannot see internal journals" do
         before do
           role.role_permissions
             .find_by(permission: "view_internal_comments")
@@ -167,23 +167,23 @@ RSpec.describe Activities::Fetcher, "integration" do
           # reload otherwise permissions don't update
           event_user.reload
 
-          # make sure restricted_note is created
-          restricted_note
+          # make sure internal_comment is created
+          internal_comment
         end
 
-        it "does not find events with restricted journals" do
-          expect(instance.events.map(&:journal).select(&:restricted)).to be_empty
+        it "does not find events with internal journals" do
+          expect(instance.events.map(&:journal).select(&:internal)).to be_empty
         end
       end
 
-      context "if user can see restricted journals" do
+      context "if user can see internal journals" do
         before do
-          # make sure restricted_note is created
-          restricted_note
+          # make sure internal_comment is created
+          internal_comment
         end
 
-        it "finds events with restricted journals" do
-          expect(instance.events.map(&:journal).select(&:restricted)).to include(restricted_note)
+        it "finds events with internal journals" do
+          expect(instance.events.map(&:journal).select(&:internal)).to include(internal_comment)
         end
       end
     end
@@ -222,7 +222,7 @@ RSpec.describe Activities::Fetcher, "integration" do
         end
       end
 
-      context "if user cannot see restricted journals" do
+      context "if user cannot see internal journals" do
         before do
           role.role_permissions
             .find_by(permission: "view_internal_comments")
@@ -231,23 +231,23 @@ RSpec.describe Activities::Fetcher, "integration" do
           # reload otherwise permissions don't update
           event_user.reload
 
-          # make sure restricted_note is created
-          restricted_note
+          # make sure internal_comment is created
+          internal_comment
         end
 
-        it "does not find events with restricted journals" do
-          expect(instance.events.map(&:journal).select(&:restricted)).to be_empty
+        it "does not find events with internal journals" do
+          expect(instance.events.map(&:journal).select(&:internal)).to be_empty
         end
       end
 
-      context "if user can see restricted journals" do
+      context "if user can see internal journals" do
         before do
-          # make sure restricted_note is created
-          restricted_note
+          # make sure internal_comment is created
+          internal_comment
         end
 
-        it "finds events with restricted journals" do
-          expect(instance.events.map(&:journal).select(&:restricted)).to include(restricted_note)
+        it "finds events with internal journals" do
+          expect(instance.events.map(&:journal).select(&:internal)).to include(internal_comment)
         end
       end
     end

@@ -37,9 +37,9 @@ module WorkPackages
       errors.add(:journal_notes, :blank) if model.journal_notes.blank?
     end
 
-    attribute :journal_restricted do
-      if model.journal_restricted && !OpenProject::FeatureDecisions.comments_with_restricted_visibility_active?
-        errors.add(:journal_restricted, :feature_disabled)
+    attribute :journal_internal do
+      if model.journal_internal && !OpenProject::FeatureDecisions.internal_comments_active?
+        errors.add(:journal_internal, :feature_disabled)
       end
     end
 

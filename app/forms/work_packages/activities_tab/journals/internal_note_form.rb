@@ -28,15 +28,15 @@
 # See COPYRIGHT and LICENSE files for more details.
 #++
 module WorkPackages::ActivitiesTab::Journals
-  class RestrictedNoteForm < ApplicationForm
+  class InternalNoteForm < ApplicationForm
     form do |notes_form|
       notes_form.check_box(
-        name: :restricted,
-        label: I18n.t("activities.work_packages.activity_tab.restrict_visibility"),
+        name: :internal,
+        label: I18n.t("activities.work_packages.activity_tab.internal_visibility"),
         checked: false,
         data: {
-          "work-packages--activities-tab--restricted-comment-target": "restrictedCheckbox",
-          action: "input->work-packages--activities-tab--restricted-comment#toggleRestriction"
+          "work-packages--activities-tab--internal-comment-target": "internalCheckbox",
+          action: "input->work-packages--activities-tab--internal-comment#toggleRestriction"
         }
       )
     end
