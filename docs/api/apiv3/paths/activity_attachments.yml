@@ -71,7 +71,7 @@ get:
         Returned if the activity does not exist or the client does not have sufficient permissions
         to see it.
 
-        **Required permission:** view_work_packages or view_comments_with_restricted_visibility (for internal comments)
+        **Required permission:** view_work_packages or view_internal_comments
 
         *Note: A client without sufficient permissions shall not be able to test for the existence of an activity.
         That's why a 404 is returned here, even if a 403 might be more appropriate.*
@@ -161,7 +161,7 @@ post:
       description: |-
         Returned if the client does not have sufficient permissions.
 
-        **Required permission:** view_work_packages or view_comments_with_restricted_visibility (for internal comments)
+        **Required permission:** view_work_packages or view_internal_comments
 
         *Note that you will only receive this error, if you are at least allowed to see the activity*
       headers: {}
@@ -180,7 +180,7 @@ post:
         Returned if the activity does not exist or the client does not have sufficient permissions
         to see it.
 
-        **Required permission:** view_work_packages or view_comments_with_restricted_visibility (for internal comments)
+        **Required permission:** view_work_packages or view_internal_comments
 
         *Note: A client without sufficient permissions shall not be able to test for the existence of an activity.
         That's why a 404 is returned here, even if a 403 might be more appropriate.*

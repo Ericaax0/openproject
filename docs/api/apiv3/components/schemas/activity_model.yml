@@ -101,7 +101,7 @@ properties:
 
               # Conditions
 
-              **Permission**: add_work_package_notes or add_comments_with_restricted_visibility (for internal comments)
+              **Permission**: add_work_package_comments or add_internal_comments
             readOnly: true
 example:
   _type: Activity::Comment
