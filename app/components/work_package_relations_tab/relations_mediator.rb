@@ -114,12 +114,20 @@ class WorkPackageRelationsTab::RelationsMediator
     @visible_relations ||= work_package.relations.visible.includes(:to, :from).load
   end
 
+  def visible_parents
+    @visible_parents ||= work_package.parent_id && work_package.parent.visible? ? [work_package.parent] : []
+  end
+
   def visible_children
     @visible_children ||= work_package.children.visible.load
   end
 
   def ghost_relations
     @ghost_relations ||= work_package.relations.includes(:to, :from).where.not(id: visible_relations.select(:id)).load
+  end
+
+  def ghost_parents
+    @ghost_parents ||= work_package.parent_id && !work_package.parent.visible? ? [work_package.parent] : []
   end
 
   def ghost_children
@@ -132,7 +140,15 @@ class WorkPackageRelationsTab::RelationsMediator
   end
 
   def relation_group(type)
-    if type == Relation::TYPE_CHILD
+    case type
+    when Relation::TYPE_PARENT
+      RelationGroup.new(
+        type:,
+        work_package:,
+        visible_relations: visible_parents,
+        ghost_relations: ghost_parents
+      )
+    when Relation::TYPE_CHILD
       RelationGroup.new(
         type:,
         work_package:,
@@ -150,7 +166,11 @@ class WorkPackageRelationsTab::RelationsMediator
   end
 
   def all_relations_count
-    visible_relations.count + ghost_relations.count + visible_children.count + ghost_children.count
+    [
+      visible_relations, ghost_relations,
+      visible_parents, ghost_parents,
+      visible_children, ghost_children
+    ].sum(&:count)
   end
 
   private
